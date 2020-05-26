@@ -1168,7 +1168,7 @@ char msg_dir(uint32_t msg_type)
 // less-than operator for NTStatStreamKey
 // so applications can use it in std::map
 //----------------------------------------------------------
-bool NTStatStreamKey::operator<(const NTStatStreamKey& b) const
+bool NTStatStreamKeyCpp::operator<(const NTStatStreamKey& b) const
 {
   if (isV6 < b.isV6) return true;
   if (isV6 > b.isV6) return false;
