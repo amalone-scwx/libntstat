@@ -61,6 +61,7 @@ typedef struct NTStatStream
   // these get updated
   NTStatCounters     stats;
   NTStatStreamState  states;
+  uint32_t           actions;
 } NTStatStream;
 
 
@@ -68,8 +69,11 @@ typedef struct NTStatStream
 #define ACTION_DEL 2
 #define ACTION_UPDATE 3
 
-typedef void (*listener_func)(int action, const NTStatStream*stream);
+/*
+ * If listener_func returns non-zero, run_ntstats will stop and exit.
+ */
+typedef int (*listener_func)(int action, const NTStatStream*stream, void *user_context);
 
-extern int run_ntstats(listener_func f, int32_t interval_sec, int32_t want_tcp, int32_t want_udp);
+extern int run_ntstats(listener_func f, void *user_context, int32_t interval_sec, int32_t want_tcp, int32_t want_udp);
 
 #endif // _NET_STATS_CLIENT_H_

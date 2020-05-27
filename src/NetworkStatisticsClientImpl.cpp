@@ -798,11 +798,14 @@ private:
         NetstatSource* source = _lookupSource(srcRef);
 
         if (source != 0L) {
-          _markSourceForRemove(source);
+          //_markSourceForRemove(source);
           removeFromWaitingForDescQueue(source);
 
           if (!(source->obj.key.lport == 0 && source->obj.key.rport == 0)) {
-            _listener->onStreamRemoved(&source->obj);
+            source->obj.actions |= 1 << ACTION_DEL;
+//            _listener->onStreamRemoved(&source->obj);
+          } else {
+            _markSourceForRemove(source);
           }
         }
       }
@@ -830,7 +833,8 @@ private:
                 if (source->obj.key.lport == 0 && source->obj.key.rport == 0) {
                   // ignore... TODO: not sure what these are.
                 } else {
-                  _listener->onStreamAdded(&source->obj);
+                  //_listener->onStreamAdded(&source->obj);
+                  source->obj.actions |= 1 << ACTION_ADD;
                 }
               }
 
@@ -853,8 +857,13 @@ private:
 
           if (source->_haveDesc) {
 
-            if (source->_requestedCount && (source->obj.stats.rxpackets > 0 || source->obj.stats.txpackets > 0))
+            if (source->_requestedCount && (source->obj.actions != 0 || source->obj.stats.rxpackets > 0 || source->obj.stats.txpackets > 0)) {
                 _listener->onStreamStatsUpdate(&source->obj);
+                if ((source->obj.actions & (1 << ACTION_DEL)) != 0) {
+                  _markSourceForRemove(source);
+                }
+                source->obj.actions = 0;
+            }
 
           } else {
             // typically we receive ADDED,COUNTS,DESC,REMOVED
